@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bib_Hacienda.Clases
 {
@@ -25,5 +21,9 @@ namespace Bib_Hacienda.Clases
         {
             this.periodo_atenuacion = periodo_atenuacion;
         }
+        
+        public enum_l_atenuaciones Periodo_atenuacion => periodo_atenuacion;
+        
     }
+    
 }

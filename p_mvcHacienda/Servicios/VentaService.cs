@@ -1,61 +1,54 @@
 ﻿using Bib_Hacienda.Clases;
+using p_mvcHacienda.Infraestructura.puertos;
+using p_mvcHacienda.Servicios.contratos;
 
-namespace p_mvcHacienda.Servicios
-{
-    public class VentaService
-    {
-        // Atributos
-        private readonly Hacienda _hacienda;
-        private readonly PersistenciaService _persistencia;
 
-        public VentaService(Hacienda hacienda, PersistenciaService persistencia)
-        {
-            _hacienda = hacienda;
-            _persistencia = persistencia;
+namespace p_mvcHacienda.Servicios {
+
+    public class VentaService : IVentaService {
+
+        private readonly IPersistenciaVentas _ventaPersistencia;
+        private readonly IPersistenciaHacienda _haciendaPersistencia;
+
+        public VentaService(IPersistenciaVentas ventaPersistencia, IPersistenciaHacienda haciendaPersistencia) {
+            _ventaPersistencia = ventaPersistencia;
+            _haciendaPersistencia = haciendaPersistencia;
         }
 
-        // Obtener todas las ventas
-        public List<Venta> ObtenerTodasLasVentas()
-        {
-            // Ordenar las ventas por fecha descendente
-            return _hacienda.L_ventas.OrderByDescending(v => v.Fecha).ToList();
+        public string VenderRes(string potreroId, string nombreRes, uint monto) {
+
+            try {
+                Hacienda hacienda = _haciendaPersistencia.CargarHacienda();
+                Potrero potrero = hacienda.buscar_potrero(potreroId);
+
+                if (potrero == null) {
+                    throw new InvalidOperationException($"No se encontró el potrero '{potreroId}'");
+                }
+
+                Res res = potrero.buscar_res(nombreRes);
+
+                if (res == null) {
+                    throw new InvalidOperationException($"No se encontró la res '{nombreRes}' en el potrero '{potreroId}'");
+                }
+
+                Usuario usuarioSistema = new Usuario("sistema", "");
+                Venta venta = new Venta(usuarioSistema, potrero, DateTime.Now, res, monto);
+
+                potrero.eliminar_res(nombreRes);
+
+                _haciendaPersistencia.GuardarHacienda(hacienda);
+                _ventaPersistencia.GuardarVenta(venta);
+
+                return $"Venta de la res '{res.Nombre}' realizada con éxito.";
+            }
+            catch (Exception ex) {
+                throw new Exception($"Error al vender la res: {ex.Message}");
+            }
         }
 
-        // Obtener ventas por potrero
-        public List<Venta> ObtenerVentasPorPotrero(string potreroId)
-        {
-            // Filtrar ventas por el ID del potrero
-            return _hacienda.L_ventas
-                .Where(v => v.Potrero.Identificacion == potreroId)
-                .OrderByDescending(v => v.Fecha)
-                .ToList();
-        }
+        public List<Venta> ObtenerTodasLasVentas() {
 
-        // Obtener ventas por rango de fechas
-        public List<Venta> ObtenerVentasPorFechas(DateTime fechaInicio, DateTime fechaFin)
-        {
-            // Filtrar ventas dentro del rango de fechas
-            return _hacienda.L_ventas
-                .Where(v => v.Fecha >= fechaInicio && v.Fecha <= fechaFin)
-                .OrderByDescending(v => v.Fecha)
-                .ToList();
-        }
-
-        // Obtener estadísticas de ventas
-        public Dictionary<string, object> ObtenerEstadisticas()
-        {
-            // Calcular estadísticas básicas de ventas
-            var ventas = _hacienda.L_ventas;
-
-            // Retornar un diccionario con las estadísticas
-            return new Dictionary<string, object>
-            {
-                { "TotalVentas", ventas.Count },
-                { "MontoTotal", ventas.Sum(v => v.Monto) },
-                { "PromedioVenta", ventas.Any() ? ventas.Average(v => v.Monto) : 0 },
-                { "VentasEsteMes", ventas.Count(v => v.Fecha.Month == DateTime.Now.Month && v.Fecha.Year == DateTime.Now.Year) },
-                { "MontoEsteMes", ventas.Where(v => v.Fecha.Month == DateTime.Now.Month && v.Fecha.Year == DateTime.Now.Year).Sum(v => v.Monto) }
-            };
+            return _ventaPersistencia.CargarVentas().OrderByDescending(v => v.Fecha).ToList();
         }
     }
 }

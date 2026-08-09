@@ -1,53 +1,33 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Bib_Hacienda.Clases;
-using p_mvcHacienda.Servicios;
-using static Bib_Hacienda.Clases.Potrero;
+using p_mvcHacienda.Servicios.Contratos;
 
-namespace p_mvcHacienda.Controllers
-{
-    public class PotreroController : Controller
-    {
-        //Atributos
-        private readonly PotreroService _potreroService;
-        private readonly Hacienda _hacienda;
-        private readonly PersistenciaService _persistencia;
+namespace p_mvcHacienda.Controllers {
 
-        //Inyección de dependencias del servicio
-        public PotreroController(PotreroService potreroService, Hacienda hacienda, PersistenciaService persistencia)
-        {
+    public class PotreroController : Controller {
+
+        private readonly IPotreroService _potreroService;
+
+        public PotreroController(IPotreroService potreroService) {
             _potreroService = potreroService;
-            _hacienda = hacienda;
-            _persistencia = persistencia;
         }
 
-        // GET
         [HttpGet]
+        public ActionResult Index() {
 
-        //Mostrar la lista de potreros y estadisticas
-        public ActionResult Index()
-        {
             var potreros = _potreroService.ObtenerTodosLosPotreros();
-            var estadisticas = _potreroService.ObtenerEstadisticas();
-      
-            ViewBag.Estadisticas = estadisticas;
-
             return View(potreros);
         }
 
-        
-        // GET: Potrero/Create - Mostrar formulario de creación
-        public ActionResult Create()
-        {
+        public ActionResult Create() {
             return View();
         }
 
-        //Detalles de un potrero
-        public ActionResult Details(string id)
-        {
+        public ActionResult Details(string id) {
+
             var potrero = _potreroService.ObtenerPotreroPorIdentificacion(id);
 
-            if (potrero == null)
-            {
+            if (potrero == null) {
                 TempData["Mensaje"] = "Potrero no encontrado";
                 TempData["TipoMensaje"] = "danger";
                 return RedirectToAction(nameof(Index));
@@ -56,39 +36,27 @@ namespace p_mvcHacienda.Controllers
             return View(potrero);
         }
 
-        // POST:
         [HttpPost]
+        public ActionResult Create(string identificacion, l_tipos_potreros tipo) {
 
-        // Procesar creación de potrero
-        public ActionResult Create(string identificacion, l_tipos_potreros tipo)
-        {
-            try
-            { 
-                // Validar entrada
-                if (string.IsNullOrWhiteSpace(identificacion))
-                {
+            try {
+                if (string.IsNullOrWhiteSpace(identificacion)) {
                     ViewBag.Mensaje = "La identificación no puede estar vacía";
                     ViewBag.TipoMensaje = "danger";
                     return View();
                 }
 
-                // Llamar al servicio para crear potrero (persiste internamente)
-                string exitoso = _potreroService.CrearPotrero(identificacion, tipo);
-                
-                // Guardar explícitamente por seguridad
-                _persistencia.GuardarPotreros(_hacienda.L_potreros);
+                string mensaje = _potreroService.CrearPotrero(identificacion, tipo);
 
-                // Si es exitoso, redirigir con mensaje de éxito
-                TempData["Mensaje"] = exitoso;
+                TempData["Mensaje"] = mensaje;
                 TempData["TipoMensaje"] = "success";
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
-            {
-                ViewBag.Mensaje = $"{ex.Message}";
+            catch (Exception ex) {
+                ViewBag.Mensaje = ex.Message;
                 ViewBag.TipoMensaje = "danger";
             }
-  
+
             return View();
         }
     }

@@ -1,109 +1,50 @@
 ﻿using Bib_Hacienda.Clases;
-using Microsoft.AspNetCore.Authentication;
-using System.Security.Claims;
+using p_mvcHacienda.Infraestructura.puertos;
+using p_mvcHacienda.Servicios.contratos;
 
-namespace p_mvcHacienda.Servicios
-{
-    public class UsuarioService
-    {   // Atributos
-        private static List<Usuario> _usuarios = new List<Usuario>();
-        private readonly PersistenciaService _persistencia;
+namespace p_mvcHacienda.Servicios {
 
-        // Constructor
-        public UsuarioService(PersistenciaService persistencia)
-        {
-            _persistencia = persistencia;
+    public class UsuarioService : IUsuarioService {
+
+        private readonly IPersistenciaUsuarios _usuarioPersistencia;
+
+        public UsuarioService(IPersistenciaUsuarios persistencia) {
+            
+            _usuarioPersistencia = persistencia;
+            
         }
 
-        // Cargar usuarios desde persistencia
-        public void CargarUsuarios()
-        {
-            _usuarios = _persistencia.CargarUsuarios();
-        }
+        public string CrearUsuario(string nombre, string contrasena) {
 
-        // Crear un nuevo usuario
-        public string CrearUsuario(string nombre, string contrasena)
-        {
-            try
-            {      // Validaciones básicas
-                if (string.IsNullOrWhiteSpace(nombre))
-                {
-                    throw new ArgumentException("El nombre del usuario no puede estar vacío");
+            try {
+                    
+                if (string.IsNullOrWhiteSpace(nombre)) {
+                    throw new ArgumentException("El nombre no puede estar vacío.");
                 }
 
-                if (string.IsNullOrWhiteSpace(contrasena))
-                {
-                    // Validar que la contraseña no esté vacía
-                    throw new ArgumentException("La contraseña no puede estar vacía");
+                if (string.IsNullOrWhiteSpace(contrasena)) {
+                    throw new ArgumentException("La contraseña no puede estar vacía.");
                 }
 
-                if (_usuarios.Any(u => u.Nombre.Equals(nombre, StringComparison.OrdinalIgnoreCase)))
-                {
-                    // Verificar si ya existe un usuario con el mismo nombre
-                    throw new InvalidOperationException($"Ya existe un usuario con el nombre '{nombre}'");
+                var usuarios = _usuarioPersistencia.CargarUsuarios();
+
+                if (usuarios.Any(u => u.Nombre.Equals(nombre, StringComparison.OrdinalIgnoreCase))) {
+                    throw new InvalidOperationException($"Ya existe un usuario con el nombre '{nombre}'.");
                 }
-                
-                // Crear y agregar el nuevo usuario
-                var nuevoUsuario = new Usuario(nombre, contrasena);
-                _usuarios.Add(nuevoUsuario);
-                _persistencia.GuardarUsuarios(_usuarios);
 
-                return $"Usuario '{nombre}' creado exitosamente";
+                Usuario nuevoUsuario = new Usuario(nombre, contrasena);
+                _usuarioPersistencia.GuardarUsuario(nuevoUsuario);
 
+                return $"Usuario '{nombre}' creado exitosamente.";
             }
-            catch (Exception ex)
-            {
-                return $"{ex.Message}";
+            catch (Exception ex) {
+                throw new Exception($"Error al crear el usuario: {ex.Message}");
             }
         }
 
-        // Autenticar usuario
-        public bool AutenticarUsuario(string nombre, string contrasena)
-        {
-            // Verificar si existe un usuario con el nombre y contraseña proporcionados
-            return _usuarios.Any(u => u.Nombre.Equals(nombre, StringComparison.OrdinalIgnoreCase) &&
-            u.Contrasena == contrasena);
-        }
+        public List<Usuario> ObtenerTodosLosUsuarios() {
 
-        // Obtener todos los usuarios
-        public List<Usuario> ObtenerTodosLosUsuarios()
-        { 
-            // Retornar la lista de usuarios ordenada por nombre
-            return _usuarios.OrderBy(u => u.Nombre).ToList();
-        }
-
-        // Buscar usuario por nombre
-        public Usuario? BuscarUsuario(string nombre)
-        {   
-            // Retornar el usuario que coincida con el nombre proporcionado
-            return _usuarios.FirstOrDefault(u => u.Nombre.Equals(nombre, StringComparison.OrdinalIgnoreCase));
-        }
-
-        // Obtener estadísticas
-        public Dictionary<string, object> ObtenerEstadisticas()
-        {
-            // Retornar un diccionario con el total de usuarios
-            return new Dictionary<string, object>
-            {
-                {"TotalUsuarios", _usuarios.Count}
-            };
-        }
-
-        public async Task<(bool, IEnumerable<Claim>)> ValidateUserAsync(string username, string password)
-        {
-            var user = _usuarios.FirstOrDefault(u => u.Nombre.Equals(username, StringComparison.OrdinalIgnoreCase) && u.Contrasena == password);
-
-            if (user != null)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, user.Nombre),
-                    // Puedes agregar más claims si tienes roles u otra información
-                };
-                return (true, claims);
-            }
-
-            return (false, null);
+            return _usuarioPersistencia.CargarUsuarios().OrderBy(u => u.Nombre).ToList();
         }
     }
 }

@@ -7,20 +7,34 @@ using System.Threading.Tasks;
 
 namespace Bib_Hacienda.Clases
 {
-    public class Ternero : Res //Hereda de Res
-    {
+    public class Ternero : Res {
 
         // Constructor
-        public Ternero(string nombre, uint peso, ushort edad) : base(nombre, peso, edad)
+        public Ternero(string nombre, uint peso, DateTime fechaNacimiento)
+            : base(nombre, peso, fechaNacimiento) {}
+        
+        public override bool ValidarCrecimiento() {
+            
+            return Peso >= ReglaRes.peso_min_ternero && Edad() <= ReglaRes.edad_max_ternero;
+            
+        }
+        
+        //metodos sobrescritos de los eventos
+        
+        public override bool EstaEnPesoMinimo()
         {
+            
+            return Peso < ReglaRes.peso_min_ternero;
+            
         }
 
-        //Accesor sobrescrito para diferenciar la edad del ternero
-        public override ushort Edad
+        public override bool EstaAptaParaVenta()
         {
-            get => base.Edad;
-            set => base.Edad = value <= ReglaRes.edad_max_ternero ? value : 
-                throw new Exception("El ternero excedió la edad maxima");
+            
+            return Peso >= ReglaRes.peso_recom_venta_ternero;
+            
         }
+        
     }
+    
 }

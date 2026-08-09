@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -12,9 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Bib_Hacienda">
-      <HintPath>..\Bib_Hacienda\Bib_Hacienda\bin\Debug\Bib_Hacienda.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\Bib_Hacienda\Bib_Hacienda\Bib_Hacienda.csproj" />
   </ItemGroup>
 
 </Project>

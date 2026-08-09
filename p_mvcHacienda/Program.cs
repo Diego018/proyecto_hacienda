@@ -1,98 +1,56 @@
-using Bib_Hacienda.Aspectos;
-using Bib_Hacienda.Clases;
+using p_mvcHacienda.Infraestructura.Implementaciones;
+using p_mvcHacienda.Infraestructura.puertos;
 using p_mvcHacienda.Servicios;
+using p_mvcHacienda.Servicios.contratos;
+using p_mvcHacienda.Servicios.Contratos;
 
-namespace p_mvcHacienda
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
+namespace p_mvcHacienda {
+
+    public class Program {
+
+        public static void Main(string[] args) {
+
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            PruebasCaracterizacion.EjecutarCasosASIS();
+
             builder.Services.AddControllersWithViews();
 
-            // --- Configuración de Autenticación por Cookies ---
             builder.Services.AddAuthentication("CookieAuth")
-                .AddCookie("CookieAuth", options =>
-                {
+                .AddCookie("CookieAuth", options => {
                     options.Cookie.Name = "HaciendaSoft.Auth";
-                    options.LoginPath = "/Account/Login"; // Página de login
+                    options.LoginPath = "/Account/Login";
                     options.AccessDeniedPath = "/Account/AccessDenied";
-                    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Duración de la sesión
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
                 });
 
-            // Agregar HttpContextAccessor
             builder.Services.AddHttpContextAccessor();
-            
-            // Registrar como Singleton (sin InterceptorValidarInformacion)
-            builder.Services.AddSingleton<PersistenciaService>();
-            
-            // Hacienda como Singleton - datos compartidos globalmente
-            builder.Services.AddSingleton<Hacienda>(sp =>
-            {
-                var hacienda = new Hacienda();
-                var persistencia = sp.GetRequiredService<PersistenciaService>();
 
-                // Cargar datos al iniciar
-                try
-                {
-                    var potreros = persistencia.CargarPotreros();
-                    foreach (var potrero in potreros)
-                    {
-                        hacienda.L_potreros.Add(potrero);
-                    }
+            string directorioDatos = Path.Combine(builder.Environment.ContentRootPath, "Datos");
 
-                    // Cargar reses en los potreros
-                    persistencia.CargarReses(hacienda.L_potreros);
+            builder.Services.AddSingleton<PersistenciaTxtService>(sp =>
+                new PersistenciaTxtService(directorioDatos));
 
-                    // Cargar vacunas aplicadas a las reses
-                    persistencia.CargarVacunasAplicadas(hacienda.L_potreros);
+            builder.Services.AddSingleton<IPersistenciaHacienda>(sp =>
+                sp.GetRequiredService<PersistenciaTxtService>());
 
-                    var ventas = persistencia.CargarVentas(hacienda.L_potreros);
-                    foreach (var venta in ventas)
-                    {
-                        hacienda.L_ventas.Add(venta);
-                    }
+            builder.Services.AddSingleton<IPersistenciaVentas>(sp =>
+                sp.GetRequiredService<PersistenciaTxtService>());
 
-                    var vacunas = persistencia.CargarVacunas();
-                    foreach (var vacuna in vacunas)
-                    {
-                        hacienda.L_vacunas.Add(vacuna);
-                    }
+            builder.Services.AddSingleton<IPersistenciaUsuarios>(sp =>
+                sp.GetRequiredService<PersistenciaTxtService>());
 
-                    Console.WriteLine($"Datos cargados: {potreros.Count} potreros, {ventas.Count} ventas, {vacunas.Count} vacunas");
-
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error al cargar datos: {ex.Message}");
-                }
-
-                return hacienda;
-            });
-
-            // Servicios como Singleton
-            builder.Services.AddSingleton<PotreroService>();
-            builder.Services.AddSingleton<ResService>();
-            builder.Services.AddSingleton<VacunaService>();
-            builder.Services.AddSingleton<VentaService>();
-            builder.Services.AddSingleton<UsuarioService>(sp =>
-            {
-                var persistencia = sp.GetRequiredService<PersistenciaService>();
-                var usuarioService = new UsuarioService(persistencia);
-                usuarioService.CargarUsuarios();
-                return usuarioService;
-            });
+            builder.Services.AddSingleton<IPotreroService, PotreroService>();
+            builder.Services.AddSingleton<IResService, ResService>();
+            builder.Services.AddSingleton<IVacunaService, VacunaService>();
+            builder.Services.AddSingleton<IVentaService, VentaService>();
+            builder.Services.AddSingleton<IUsuarioService, UsuarioService>();
+            builder.Services.AddSingleton<IAutenticacionService, AutenticacionService>();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
+            if (!app.Environment.IsDevelopment()) {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -101,7 +59,6 @@ namespace p_mvcHacienda
 
             app.UseRouting();
 
-            // --- Habilitar Autenticación y Autorización ---
             app.UseAuthentication();
             app.UseAuthorization();
 

@@ -11,7 +11,7 @@ namespace Bib_Hacienda.Clases.Validaciones
     {
         public override bool ValidarRes(Res res)
         {
-            if (res == null || string.IsNullOrWhiteSpace(res.Nombre) || res.Peso <= 0 || res.Edad <= 0)
+            if (res == null || string.IsNullOrWhiteSpace(res.Nombre) || res.Peso <= 0 || res.Edad() <= 0)
             {
                 return false;
             }

@@ -1,40 +1,68 @@
-﻿using Bib_Hacienda.Eventos;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Bib_Hacienda.Clases.RefactorBiblioteca;
 
 namespace Bib_Hacienda.Clases
 {
     public abstract class Res
     {
-
-        //Atributos
         private string nombre;
         private uint peso;
-        private ushort edad;
-        private List<Vacuna> l_vacunas_aplicadas;
+        private DateTime fechaNacimiento;
+        private List<Vacuna> vacunasAplicadas;
+        private ChipsGeolocalizacion chip;
+        private HistoriaClinica historiaClinica;
+        private List<ProductoGanadero> productos;
+        
+        public string Nombre => nombre;
+        public uint Peso => peso;
+        public DateTime FechaNacimiento => fechaNacimiento;
+        public List<Vacuna> VacunasAplicadas => vacunasAplicadas;
 
-        internal void EventHandler() { }
-
-        //Constructor
-        public Res(string nombre, uint peso, ushort edad)
-        {
-            this.Nombre = nombre;
-            this.Peso = peso;
-            this.Edad = edad;
-            this.l_vacunas_aplicadas = new List<Vacuna>();
+        protected Res(string nombre, uint peso, DateTime fechaNacimiento) {
+            
+            this.nombre = nombre;
+            this.peso = peso;
+            this.fechaNacimiento = fechaNacimiento;
+            vacunasAplicadas = new List<Vacuna>();
+            productos = new List<ProductoGanadero>();
+            
         }
 
-        //Accesores
-        public virtual ushort Edad 
-        { 
-            get => edad;
-            set => edad = value; 
+        public void alimentar(uint cantidad) {
+            
+            peso += cantidad;
+            
         }
-        public List<Vacuna> L_vacunas_aplicadas { get => l_vacunas_aplicadas; set => l_vacunas_aplicadas = value; }
-        public string Nombre { get => nombre; set => nombre = value; }
-        public uint Peso { get => peso; set => peso = value; }
+
+        public void agregarVacuna(Vacuna vacuna) {
+            
+            vacunasAplicadas.Add(vacuna);
+        }
+
+        // todo: calcula la edad en meses a partir de la fecha de nacimiento
+        public ushort Edad() {
+            
+            int meses = ((DateTime.Now.Year - fechaNacimiento.Year) * 12)
+                + DateTime.Now.Month - fechaNacimiento.Month;
+
+            if (DateTime.Now.Day < fechaNacimiento.Day) {
+                
+                meses--;
+                
+            }
+
+            return (ushort)Math.Max(meses, 0);
+            
+        }
+        
+        public abstract bool ValidarCrecimiento(); 
+        
+        //metodos para manejar los eventos
+        
+        public abstract bool EstaEnPesoMinimo();
+        public abstract bool EstaAptaParaVenta();
+        
     }
+    
 }

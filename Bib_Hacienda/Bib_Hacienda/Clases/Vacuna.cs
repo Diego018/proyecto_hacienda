@@ -1,9 +1,4 @@
-﻿using Bib_Hacienda.Eventos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 
 namespace Bib_Hacienda.Clases
 {
@@ -17,18 +12,19 @@ namespace Bib_Hacienda.Clases
         private DateTime fecha_aplicacion;
 
         //Constructor
-        public Vacuna(string nombre, string lote, DateTime fecha_vencimiento, DateTime fecha_aplicacion)
-        {
-            this.Nombre = nombre;
-            this.Lote = lote;
-            this.Fecha_vencimiento = fecha_vencimiento;
-            this.Fecha_aplicacion = fecha_aplicacion;
+        protected Vacuna(string nombre, string lote, DateTime fecha_vencimiento, DateTime fecha_aplicacion) {
+         
+            Nombre = nombre;
+            Lote = lote;
+            Fecha_vencimiento = fecha_vencimiento;
+            Fecha_aplicacion = fecha_aplicacion;
+            
         }
 
         //Accesores
-        public string Nombre { get => nombre; set => nombre = value; }
-        public string Lote { get => lote; set => lote = value; }
-        public DateTime Fecha_vencimiento { get => fecha_vencimiento; set => fecha_vencimiento = value; }
-        public DateTime Fecha_aplicacion { get => fecha_aplicacion; set => fecha_aplicacion = value; }
+        public string Nombre { get => nombre; private set => nombre = value; }
+        public string Lote { get => lote; private set => lote = value; }
+        public DateTime Fecha_vencimiento { get => fecha_vencimiento; private set => fecha_vencimiento = value; }
+        public DateTime Fecha_aplicacion { get => fecha_aplicacion; private set => fecha_aplicacion = value; }
     }
 }

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bib_Hacienda.Clases
 {
@@ -12,19 +8,22 @@ namespace Bib_Hacienda.Clases
         private DateTime fecha;
         private Res res;
         private uint monto;
+        private Usuario usuario;
 
-        public Venta(Potrero potrero, DateTime fecha, Res res, uint monto)
+        public Venta(Usuario usuario, Potrero potrero, DateTime fecha, Res res, uint monto)
         {
-            this.Potrero = potrero;
-            this.Fecha = fecha;
-            this.Res = res;
-            this.Monto = monto;
+            Usuario = usuario;
+            Potrero = potrero;
+            Fecha = fecha;
+            Res = res;
+            Monto = monto;
         }
 
         //Accesores
-        public Potrero Potrero { get => potrero; set => potrero = value; }
-        public DateTime Fecha { get => fecha; set => fecha = value; }
-        public Res Res { get => res; set => res = value; }
-        public uint Monto { get => monto; set => monto = value; }
+        public Potrero Potrero { get => potrero; private set => potrero = value; }
+        public DateTime Fecha { get => fecha; private set => fecha = value; }
+        public Res Res { get => res; private set => res = value; }
+        public uint Monto { get => monto; private set => monto = value; }
+        public Usuario Usuario { get => usuario; private set => usuario = value; }
     }
 }

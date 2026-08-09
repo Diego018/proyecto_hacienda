@@ -1,90 +1,72 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using p_mvcHacienda.Servicios;
+﻿using Microsoft.AspNetCore.Mvc;
+using p_mvcHacienda.Servicios.contratos;
 
-namespace p_mvcHacienda.Controllers
-{
-    public class VentaController : Controller
-    {
-        private readonly VentaService _ventaService;
+namespace p_mvcHacienda.Controllers {
 
-        public VentaController(VentaService ventaService)
-        {
+    public class VentaController : Controller {
+
+        private readonly IVentaService _ventaService;
+
+        public VentaController(IVentaService ventaService) {
             _ventaService = ventaService;
         }
 
-        // GET: VentaController
-        public ActionResult Index()
-        {
+        public ActionResult Index() {
+
             var ventas = _ventaService.ObtenerTodasLasVentas();
-            var estadisticas = _ventaService.ObtenerEstadisticas();
-
-            ViewBag.Estadisticas = estadisticas;
-
             return View(ventas);
         }
 
-        // GET: VentaController/Details/5
-        public ActionResult Details(int id)
-        {
+        public ActionResult Details(int id) {
             return View();
         }
 
-        // GET: VentaController/Create
-        public ActionResult Create()
-        {
+        public ActionResult Create() {
             return View();
         }
 
-        // GET: VentaController/Edit/5
-        public ActionResult Edit(int id)
-        {
+        public ActionResult Edit(int id) {
             return View();
         }
 
-        // GET: VentaController/Delete/5
-        public ActionResult Delete(int id)
-        {
+        public ActionResult Delete(int id) {
             return View();
         }
 
-        // POST: VentaController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
+        public ActionResult Create(IFormCollection collection) {
+
+            try {
+                string potreroId = collection["potreroId"];
+                string nombreRes = collection["nombreRes"];
+                uint monto = uint.Parse(collection["monto"]);
+
+                _ventaService.VenderRes(potreroId, nombreRes, monto);
+
                 return RedirectToAction(nameof(Index));
             }
-            catch
-            {
+            catch {
                 return View();
             }
         }
 
-        // POST: VentaController/Edit/5
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
+        public ActionResult Edit(int id, IFormCollection collection) {
+
+            try {
                 return RedirectToAction(nameof(Index));
             }
-            catch
-            {
+            catch {
                 return View();
             }
         }
 
-        // POST: VentaController/Delete/5
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
+        public ActionResult Delete(int id, IFormCollection collection) {
+
+            try {
                 return RedirectToAction(nameof(Index));
             }
-            catch
-            {
+            catch {
                 return View();
             }
         }

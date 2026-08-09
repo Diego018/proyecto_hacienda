@@ -1,9 +1,5 @@
 ﻿using Bib_Hacienda.Reglas;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bib_Hacienda.Clases
 {
@@ -14,9 +10,11 @@ namespace Bib_Hacienda.Clases
         private uint periodo_aplicacion;
 
         //Constructor
-        public Bacteriana(string nombre, string lote, DateTime fecha_vencimiento, DateTime fecha_aplicacion, uint periodo_aplicacion) : base(nombre, lote, fecha_vencimiento, fecha_aplicacion)
-        {
-            this.Periodo_aplicacion = periodo_aplicacion;
+        public Bacteriana(string nombre, string lote, DateTime fecha_vencimiento, DateTime fecha_aplicacion, 
+            uint periodo_aplicacion) : base(nombre, lote, fecha_vencimiento, fecha_aplicacion) {
+        
+            Periodo_aplicacion = periodo_aplicacion;
+            
         }
 
         //Accesores

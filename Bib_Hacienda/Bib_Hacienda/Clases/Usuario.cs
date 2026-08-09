@@ -6,15 +6,16 @@ using System.Threading.Tasks;
 
 namespace Bib_Hacienda.Clases
 {
-    public class Usuario
-    {
+    public class Usuario {
+    
         private string nombre;
         private string contrasena;
 
-        public Usuario(string nombre, string contrasena)
-        {
-            this.Nombre = nombre;
-            this.Contrasena = contrasena;
+        public Usuario (string nombre, string contrasena) {
+            
+            Nombre = nombre;
+            Contrasena = contrasena;
+            
         }
 
         public string Nombre { get => nombre; set => nombre = value; }

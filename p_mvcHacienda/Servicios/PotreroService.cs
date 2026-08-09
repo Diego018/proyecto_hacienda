@@ -1,124 +1,102 @@
-﻿using Bib_Hacienda.Clases;
-using static Bib_Hacienda.Clases.Potrero;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Bib_Hacienda.Clases;
+using Bib_Hacienda.Eventos;
+using Bib_Hacienda.Reglas;
+using p_mvcHacienda.Infraestructura.puertos;
+using p_mvcHacienda.Servicios.Contratos;
 
-namespace p_mvcHacienda.Servicios
-{
-    public class PotreroService
-    {
-        // Atributos
-        private readonly Hacienda _hacienda;
-        private readonly PersistenciaService _persistencia;
+namespace p_mvcHacienda.Servicios {
 
-        // Constructor
-        public PotreroService(Hacienda hacienda, PersistenciaService persistencia)
-        {
-            _hacienda = hacienda;
-            _persistencia = persistencia;
+    public class PotreroService : IPotreroService {
+
+        private readonly IPersistenciaHacienda _haciendaPersistencia;
+
+        public PotreroService(IPersistenciaHacienda persistencia) {
+            _haciendaPersistencia = persistencia;
         }
 
-        // Crear un nuevo potrero
-        public string CrearPotrero(string identificacion, l_tipos_potreros tipo)
-        {
-            try
-            {
-                string validado;
-                // Verificar si ya existe un potrero con esa identificación
-                if (_hacienda.L_potreros.Any(p => p.Identificacion == identificacion))
-                {
+        public string CrearPotrero(string identificacion, l_tipos_potreros tipo) {
+
+            try {
+                Hacienda hacienda = _haciendaPersistencia.CargarHacienda();
+
+                if (hacienda.obtener_potreros().Any(p => p.Identificacion == identificacion)) {
                     throw new InvalidOperationException($"Ya existe un potrero con la identificación '{identificacion}'");
                 }
 
-                // Intentar crear el potrero (mensaje de evento del dominio)
-                string resultado = _hacienda.crear_potrero(identificacion, tipo);
+                string resultado = hacienda.crear_potrero(identificacion, tipo);
+                _haciendaPersistencia.GuardarHacienda(hacienda);
 
-                // Guardar los cambios CON VALIDACIÓN (mensaje del aspecto de persistencia)
-                validado = _persistencia.GuardarPotreros(_hacienda.L_potreros);
-
-                // Mensaje compuesto: evento + guardado
-                return $"{resultado}. {validado}";
+                return resultado;
             }
-            catch (InvalidOperationException)
-            {
-                throw new InvalidOperationException("Validación fallida: El potrero no cumple los requisitos");
-            }
-            catch (Exception ex)
-            {
-                // Re-lanzar la excepción para que el controlador la maneje
+            catch (Exception ex) {
                 throw new Exception($"Error al crear el potrero: {ex.Message}");
             }
         }
 
-        // Obtener todos los potreros
-        public List<Potrero> ObtenerTodosLosPotreros()
-        {
-            return _hacienda.L_potreros.OrderBy(p => p.Identificacion).ToList();
+        public List<Potrero> ObtenerTodosLosPotreros() {
+
+            Hacienda hacienda = _haciendaPersistencia.CargarHacienda();
+            return hacienda.obtener_potreros().OrderBy(p => p.Identificacion).ToList();
         }
 
-        // Obtener un potrero por identificación
-        public Potrero? ObtenerPotreroPorIdentificacion(string identificacion)
-        {
-            try
-            {
-                return _hacienda.buscar_potrero(identificacion);
-            }
-            catch
-            {
-                return null;
-            }
+        public Potrero ObtenerPotreroPorIdentificacion(string id) {
+
+            Hacienda hacienda = _haciendaPersistencia.CargarHacienda();
+            return hacienda.buscar_potrero(id);
         }
 
-        // Agregar una res al potrero
-        public string AgregarRes(string potreroId, string nombreRes, ushort edad, uint peso)
-        {
-            try
-            {
-                string validado;
+        public string AgregarRes(string potreroId, Res res) {
 
-                // Verificar que el potrero existe
-                var potrero = _hacienda.buscar_potrero(potreroId);
-                if (potrero == null)
-                {
+            try {
+                if (res == null || string.IsNullOrWhiteSpace(res.Nombre)) {
+                    throw new ArgumentException("El nombre de la res no puede estar vacío.");
+                }
+
+                Hacienda hacienda = _haciendaPersistencia.CargarHacienda();
+                Potrero potrero = hacienda.buscar_potrero(potreroId);
+
+                if (potrero == null) {
                     throw new InvalidOperationException($"No se encontró el potrero '{potreroId}'");
                 }
 
-                // Verificar que no existe una res con ese nombre en el potrero
-                if (potrero.L_reses.Any(r => r.Nombre == nombreRes))
-                {
-                    throw new InvalidOperationException($"Ya existe una res con el nombre '{nombreRes}' en el potrero '{potreroId}'");
+                if (potrero.buscar_res(res.Nombre) != null) {
+                    throw new InvalidOperationException($"Ya existe una res con el nombre '{res.Nombre}' en el potrero '{potreroId}'");
                 }
 
-                // Usar el método de Hacienda (mensaje de evento del dominio)
-                string resultado = _hacienda.anadir_res_potrero(potreroId, nombreRes, edad, peso);
+                int cantidadActual = potrero.obtener_reses().Count;
 
-                // Guardar con validación (mensaje del aspecto)
-                validado = _persistencia.GuardarReses(_hacienda.L_potreros);
+                if (!ReglaPotrero.validarCapacidad(cantidadActual)) {
+                    throw new InvalidOperationException($"El potrero '{potreroId}' alcanzó su capacidad máxima ({ReglaPotrero.max_reses_potrero} reses).");
+                }
 
-                // Mensaje compuesto: evento + guardado
-                return $"{resultado}. {validado}";
+                if (!res.ValidarCrecimiento()) {
+                    throw new InvalidOperationException($"La res '{res.Nombre}' no cumple las condiciones de peso/edad para su categoría.");
+                }
+
+                string resultado = potrero.anadir_res(res);
+
+                ushort cantidadNueva = (ushort)potrero.obtener_reses().Count;
+                string mensajeEventos = "";
+
+                var publisherLleno = new PublisherPotreroLleno();
+                var publisherMitad = new PublisherPotreroMitad();
+
+                publisherLleno.evt_potrero_lleno += (mensaje) => mensajeEventos += "\n" + mensaje;
+                publisherMitad.evt_potrero_mitad += (mensaje) => mensajeEventos += "\n" + mensaje;
+
+                publisherLleno.Informar_Potrero_Lleno(cantidadNueva, potrero);
+                publisherMitad.Informar_Potrero_Mitad(cantidadNueva, potrero);
+
+                _haciendaPersistencia.GuardarHacienda(hacienda);
+
+                return resultado + mensajeEventos;
             }
-            catch (InvalidOperationException)
-            {
-                throw new InvalidOperationException("Validación fallida: La res no cumple los requisitos");
-            }
-            catch (Exception ex)
-            {
-                // Re-lanzar la excepción para que el controlador la maneje
+            catch (Exception ex) {
                 throw new Exception($"Error al agregar la res: {ex.Message}");
             }
-        }
-
-        // Obtener estadísticas
-        public Dictionary<string, object> ObtenerEstadisticas()
-        {
-            var potreros = _hacienda.L_potreros;
-
-            return new Dictionary<string, object>
-            {
-                { "TotalPotreros", potreros.Count },
-                { "TotalReses", potreros.Sum(p => p.L_reses.Count) },
-                { "PotrerosVacios", potreros.Count(p => p.L_reses.Count ==0) },
-                { "PotrerosConReses", potreros.Count(p => p.L_reses.Count >0) }
-            };
         }
     }
 }

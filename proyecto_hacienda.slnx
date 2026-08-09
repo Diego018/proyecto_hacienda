@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/Bib_Hacienda/">
+    <Project Path="Bib_Hacienda/Bib_Hacienda/Bib_Hacienda.csproj" />
+  </Folder>
+  <Project Path="p_mvcHacienda/p_mvcHacienda.csproj" />
+</Solution>

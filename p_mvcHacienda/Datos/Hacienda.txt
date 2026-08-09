@@ -1,0 +1,4 @@
+#POTRERO|identificacion|tipo_potrero
+#RES|identificacion_potrero|nombre|peso|fechaNacimiento|tipo_res
+#VACUNA_APLICADA|nombre_potrero|nombre_res|nombre_vacuna|lote|fechaVenc|fechaAplic|tipo_vacuna|periodo_o_atenuacion
+#VACUNA_CATALOGO|nombre|lote|fechaVenc|fechaAplic|tipo_vacuna|periodo_o_atenuacion

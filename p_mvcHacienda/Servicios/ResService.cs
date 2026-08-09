@@ -1,73 +1,89 @@
-﻿using Bib_Hacienda.Clases;
+﻿using System;
+using System.Collections.Generic;
+using Bib_Hacienda.Clases;
+using Bib_Hacienda.Eventos;
+using p_mvcHacienda.Infraestructura.puertos;
+using p_mvcHacienda.Servicios.Contratos;
 
-namespace p_mvcHacienda.Servicios
-{
-    public class ResService
-    {
-        // Atributos
-        private readonly Hacienda _hacienda;
-        private readonly PersistenciaService _persistencia;
+namespace p_mvcHacienda.Servicios {
 
-        // Constructor
-        public ResService(Hacienda hacienda, PersistenciaService persistencia)
-        {
-            _hacienda = hacienda;
-            _persistencia = persistencia;
+    public class ResService : IResService {
+
+        private readonly IPersistenciaHacienda _haciendaPersistencia;
+
+        public ResService(IPersistenciaHacienda persistencia) {
+            _haciendaPersistencia = persistencia;
         }
 
-        // Obtener todas las reses de todos los potreros
-        public List<(Potrero Potrero, Res Res)> ObtenerTodasLasReses()
-        {
-            // Lista para almacenar las reses junto con su potrero
-            var resesConPotrero = new List<(Potrero, Res)>();
+        public string AlimentarRes(string potreroId, string nombreRes, uint cantidad) {
 
-            // Recorrer cada potrero y sus reses
-            foreach (var potrero in _hacienda.L_potreros)
-            {
-                // Agregar cada res junto con su potrero a la lista
-                foreach (var res in potrero.L_reses)
-                {
-                    resesConPotrero.Add((potrero, res));
+            try {
+                Hacienda hacienda = _haciendaPersistencia.CargarHacienda();
+                Potrero potrero = hacienda.buscar_potrero(potreroId);
+
+                if (potrero == null) {
+                    throw new InvalidOperationException($"No se encontró el potrero '{potreroId}'");
+                }
+
+                Res res = potrero.buscar_res(nombreRes);
+
+                if (res == null) {
+                    throw new InvalidOperationException($"No se encontró la res '{nombreRes}' en el potrero '{potreroId}'");
+                }
+
+                res.alimentar(cantidad);
+
+                string mensajeEventos = "";
+
+                var publisherPesoMin = new PublisherPesoMin();
+                var publisherPesoVenta = new PublisherPesoVenta();
+
+                publisherPesoMin.evt_peso_min += (mensaje) => {
+                    if (!string.IsNullOrEmpty(mensaje)) mensajeEventos += mensaje + "\n";
+                };
+
+                publisherPesoVenta.evt_peso_venta += (mensaje) => {
+                    if (!string.IsNullOrEmpty(mensaje)) mensajeEventos += mensaje + "\n";
+                };
+
+                publisherPesoMin.Informar_Peso_Min(res);
+                publisherPesoVenta.Informar_Peso_Venta(res);
+
+                _haciendaPersistencia.GuardarHacienda(hacienda);
+
+                string mensajeFinal = $"La res '{res.Nombre}' ha sido alimentada, ahora pesa {res.Peso} kg.";
+
+                if (!string.IsNullOrEmpty(mensajeEventos)) {
+                    mensajeFinal += "\n" + mensajeEventos.TrimEnd();
+                }
+
+                return mensajeFinal;
+            }
+            catch (Exception ex) {
+                throw new Exception($"Error al alimentar la res: {ex.Message}");
+            }
+        }
+
+        public Res BuscarRes(string potreroId, string nombreRes) {
+
+            Hacienda hacienda = _haciendaPersistencia.CargarHacienda();
+            Potrero potrero = hacienda.buscar_potrero(potreroId);
+
+            return potrero?.buscar_res(nombreRes);
+        }
+
+        public List<(Potrero Potrero, Res Res)> ObtenerTodasLasReses() {
+
+            Hacienda hacienda = _haciendaPersistencia.CargarHacienda();
+            var resultado = new List<(Potrero, Res)>();
+
+            foreach (var potrero in hacienda.obtener_potreros()) {
+                foreach (var res in potrero.obtener_reses()) {
+                    resultado.Add((potrero, res));
                 }
             }
 
-            return resesConPotrero;
-        }
-
-        // Buscar res en un potrero
-        public Res? BuscarRes(string potreroId, string nombreRes) //signo de pregunta porque es nulleable o sea que
-                                                                 //busca una res y si no la encuentra devuelve null
-        {
-            try
-            {
-                // Buscar el potrero por su identificación
-                var potrero = _hacienda.buscar_potrero(potreroId);
-                return potrero.buscar_res(nombreRes);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        // Obtener estadísticas de reses
-        public Dictionary<string, object> ObtenerEstadisticas()
-        {
-            // Obtener todas las reses
-            var todasLasReses = ObtenerTodasLasReses();
-
-            // Estadísticas con orden correcto:
-            // Terneros (0-12 meses) = jóvenes
-            // Cebones (13-48 meses) = medios 
-            // Novillos (49+ meses) = viejos
-            return new Dictionary<string, object>
-            {
-                { "TotalReses", todasLasReses.Count },
-                { "Terneros", todasLasReses.Count(r => r.Res is Ternero) }, // Jóvenes (0-12 meses)
-                { "Cebones", todasLasReses.Count(r => r.Res is Cebon) },   // Medios (13-48 meses)
-                { "Novillos", todasLasReses.Count(r => r.Res is Novillo) }, // Viejos (49+ meses)
-                { "PesoPromedio", todasLasReses.Any() ? todasLasReses.Average(r => r.Res.Peso) : 0 }
-            };
+            return resultado;
         }
     }
 }

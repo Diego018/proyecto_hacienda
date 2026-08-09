@@ -1,172 +1,138 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using p_mvcHacienda.Servicios;
-using static Bib_Hacienda.Clases.Viva;
+﻿using Microsoft.AspNetCore.Mvc;
+using Bib_Hacienda.Clases;
+using p_mvcHacienda.Servicios.Contratos;
 using System.Globalization;
+using p_mvcHacienda.Servicios.contratos;
 
-namespace p_mvcHacienda.Controllers
-{
-    public class VacunaController : Controller
-    {
-        // Atributos
-        private readonly VacunaService _vacunaService;
-        private readonly ResService _resService;
-        private readonly PotreroService _potreroService;
+namespace p_mvcHacienda.Controllers {
 
-        //Constructor con inyección de dependencias
-        public VacunaController(VacunaService vacunaService, ResService resService, PotreroService potreroService)
-        {
+    public class VacunaController : Controller {
+
+        private readonly IVacunaService _vacunaService;
+        private readonly IResService _resService;
+        private readonly IPotreroService _potreroService;
+
+        public VacunaController(IVacunaService vacunaService, IResService resService, IPotreroService potreroService) {
             _vacunaService = vacunaService;
             _resService = resService;
             _potreroService = potreroService;
         }
 
-        // GET: Vacuna/Index - Listar todas las vacunas
         [HttpGet]
-        public ActionResult Index()
-        {
+        public ActionResult Index() {
+
             var vacunas = _vacunaService.ObtenerVacunasDisponibles();
-            var estadisticas = _vacunaService.ObtenerEstadisticas();
-
-            ViewBag.Estadisticas = estadisticas;
-
             return View(vacunas);
         }
 
-        // GET: Vacuna/Create - Mostrar formulario de creación
         [HttpGet]
-        public ActionResult Create()
-        {
+        public ActionResult Create() {
             return View();
         }
 
-        // GET: Vacuna/Aplicar - Mostrar formulario de aplicación
+        
         [HttpGet]
-        public ActionResult Aplicar()
-        {
+        public ActionResult Aplicar() {
+
             ViewBag.Potreros = _potreroService.ObtenerTodosLosPotreros();
             ViewBag.Reses = _resService.ObtenerTodasLasReses();
-            ViewBag.Vacunas = _vacunaService.ObtenerVacunasDisponibles();
+            ViewBag.Vacunas = new List<Vacuna>(); // sin catálogo persistido, ver observación pendiente
             return View();
         }
 
-        // POST: Vacuna/Create - Procesar creación de vacuna
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(string tipoVacuna, string nombre, string lote,
-            string fechaVencimiento, string fechaAplicacion,    
-            uint? periodoAplicacion, enum_l_atenuaciones? atenuacion)
-        {
-            try
-            {
-                string resultado;
+            string fechaVencimiento, string fechaAplicacion,
+            uint? periodoAplicacion, Viva.enum_l_atenuaciones? atenuacion) {
 
-                // Validar campos requeridos básicos
-                if (string.IsNullOrWhiteSpace(nombre) || string.IsNullOrWhiteSpace(lote))
-                {
+            try {
+                if (string.IsNullOrWhiteSpace(nombre) || string.IsNullOrWhiteSpace(lote)) {
                     ViewBag.Mensaje = "El nombre y lote son requeridos";
                     ViewBag.TipoMensaje = "danger";
                     return View();
                 }
 
-                // Parsear fechas desde inputs HTML date (yyyy-MM-dd)
-                if (!DateTime.TryParseExact(fechaVencimiento, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fechaVenc))
-                {
+                if (!DateTime.TryParseExact(fechaVencimiento, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fechaVenc)) {
                     ViewBag.Mensaje = "Fecha de vencimiento inválida";
                     ViewBag.TipoMensaje = "danger";
                     return View();
                 }
-                if (!DateTime.TryParseExact(fechaAplicacion, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fechaAplic))
-                {
+
+                if (!DateTime.TryParseExact(fechaAplicacion, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fechaAplic)) {
                     ViewBag.Mensaje = "Fecha de aplicación inválida";
                     ViewBag.TipoMensaje = "danger";
                     return View();
                 }
 
-                // Reglas simples de fecha
-                if (fechaAplic > fechaVenc)
-                {
-                    ViewBag.Mensaje = "La fecha de aplicación no puede ser posterior a la fecha de vencimiento";
+                if (fechaAplic > fechaVenc) {
+                    ViewBag.Mensaje = "La fecha de aplicación no puede ser posterior a la de vencimiento";
                     ViewBag.TipoMensaje = "danger";
                     return View();
                 }
 
-                if (tipoVacuna == "Bacteriana")
-                {
-                    //HasValue para validar que no sea nulo la entrada del formulario en la vista
-                    if (!periodoAplicacion.HasValue)
-                    {
+                Vacuna vacuna;
+
+                if (tipoVacuna == "Bacteriana") {
+                    if (!periodoAplicacion.HasValue) {
                         ViewBag.Mensaje = "El período de aplicación es requerido para vacunas bacterianas";
                         ViewBag.TipoMensaje = "danger";
                         return View();
                     }
-                    // Pasar null para atenuación en bacterianas
-                    resultado = _vacunaService.CrearVacuna(nombre, lote, fechaVenc, fechaAplic, periodoAplicacion.Value, null);
+                    vacuna = new Bacteriana(nombre, lote, fechaVenc, fechaAplic, periodoAplicacion.Value);
                 }
-                else // Viva
-                {
-                    if (!atenuacion.HasValue)
-                    {
+                else {
+                    if (!atenuacion.HasValue) {
                         ViewBag.Mensaje = "La atenuación es requerida para vacunas vivas";
                         ViewBag.TipoMensaje = "danger";
                         return View();
                     }
-                    // Pasar null para período en vivas
-                    resultado = _vacunaService.CrearVacuna(nombre, lote, fechaVenc, fechaAplic, null, atenuacion.Value);
+                    vacuna = new Viva(nombre, lote, fechaVenc, fechaAplic, atenuacion.Value);
                 }
 
-                if (resultado.Contains("x"))
-                {
-                    TempData["Mensaje"] = resultado;
-                    TempData["TipoMensaje"] = "success";
-                    return RedirectToAction(nameof(Index));
-                }
-                else
-                {
-                    ViewBag.Mensaje = resultado;
-                    ViewBag.TipoMensaje = "danger";
-                    return View();
-                }
+                string resultado = _vacunaService.CrearVacuna(vacuna);
+
+                TempData["Mensaje"] = resultado;
+                TempData["TipoMensaje"] = "success";
+                return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
-            {
-                ViewBag.Mensaje = $" Error: {ex.Message}";
+            catch (Exception ex) {
+                ViewBag.Mensaje = $"Error: {ex.Message}";
                 ViewBag.TipoMensaje = "danger";
                 return View();
             }
         }
 
-        // POST: Vacuna/Aplicar - Procesar aplicación de vacuna
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Aplicar(string potreroId, string nombreRes, string loteVacuna)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(potreroId) || string.IsNullOrWhiteSpace(nombreRes) || string.IsNullOrWhiteSpace(loteVacuna))
-                {
-                    ViewBag.Mensaje = " Todos los campos son requeridos";
+        public ActionResult Aplicar(string potreroId, string nombreRes, string tipoVacuna, string nombreVacuna, string lote,
+            string fechaVencimiento, string fechaAplicacion, uint? periodoAplicacion, Viva.enum_l_atenuaciones? atenuacion) {
+
+            try {
+                if (string.IsNullOrWhiteSpace(potreroId) || string.IsNullOrWhiteSpace(nombreRes)) {
+                    ViewBag.Mensaje = "Todos los campos son requeridos";
                     ViewBag.TipoMensaje = "danger";
                     ViewBag.Potreros = _potreroService.ObtenerTodosLosPotreros();
-                    ViewBag.Reses = _resService.ObtenerTodasLasReses();
-                    ViewBag.Vacunas = _vacunaService.ObtenerVacunasDisponibles();
                     return View();
                 }
 
-                var resultado = _vacunaService.AplicarVacuna(potreroId, nombreRes, loteVacuna);
+                DateTime.TryParseExact(fechaVencimiento, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fechaVenc);
+                DateTime.TryParseExact(fechaAplicacion, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fechaAplic);
+
+                Vacuna vacuna = tipoVacuna == "Bacteriana"
+                    ? new Bacteriana(nombreVacuna, lote, fechaVenc, fechaAplic, periodoAplicacion ?? 0)
+                    : new Viva(nombreVacuna, lote, fechaVenc, fechaAplic, atenuacion ?? Viva.enum_l_atenuaciones.Atenuacion10);
+
+                var resultado = _vacunaService.AplicarVacuna(potreroId, nombreRes, vacuna);
 
                 TempData["Mensaje"] = resultado;
-                TempData["TipoMensaje"] = resultado.Contains("x") ? "success" : "danger";
-
+                TempData["TipoMensaje"] = "success";
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
-            {
-                ViewBag.Mensaje = $" Error: {ex.Message}";
+            catch (Exception ex) {
+                ViewBag.Mensaje = $"Error: {ex.Message}";
                 ViewBag.TipoMensaje = "danger";
                 ViewBag.Potreros = _potreroService.ObtenerTodosLosPotreros();
-                ViewBag.Reses = _resService.ObtenerTodasLasReses();
-                ViewBag.Vacunas = _vacunaService.ObtenerVacunasDisponibles();
                 return View();
             }
         }

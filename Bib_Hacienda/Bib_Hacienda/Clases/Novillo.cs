@@ -1,26 +1,27 @@
 ﻿using Bib_Hacienda.Reglas;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Bib_Hacienda.Clases
 {
-    public class Novillo : Res //Hereda de Res
-    {
+    public class Novillo : Res {
 
-        //Constructor
-        public Novillo(string nombre, uint peso, ushort edad) : base(nombre, peso, edad)
-        {
+        public Novillo(string nombre, uint peso, DateTime fechaNacimiento)
+            : base(nombre, peso, fechaNacimiento) {}
+
+        public override bool ValidarCrecimiento() {
+
+            return Peso >= ReglaRes.peso_min_novillo
+                   && Edad() > ReglaRes.edad_max_cebon;
         }
 
-        //Accesor sobrescrito para diferenciar la edad del novillo
-        public override ushort Edad
-        {
-            get => base.Edad;
-            set => base.Edad = value > ReglaRes.edad_max_cebon ? value :
-                throw new Exception("El ternero excedió la edad maxima");
+        public override bool EstaEnPesoMinimo() {
+
+            return Peso < ReglaRes.peso_min_novillo;
+        }
+
+        public override bool EstaAptaParaVenta() {
+
+            return Peso >= ReglaRes.peso_recom_venta_novillo;
         }
     }
 }

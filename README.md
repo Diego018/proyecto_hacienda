@@ -3,7 +3,8 @@
 Proyecto académico de Arquitectura de Software — refactorización de un sistema de gestión ganadera (potreros, reses, vacunas, ventas, usuarios) aplicando los 5 principios SOLID, siguiendo una arquitectura en capas (Presentación, Aplicación, Dominio, Infraestructura).
 
 >  **Todo el trabajo del proyecto (código fuente, diagramas y documentación) se encuentra en la rama `development`, no en `main`.** Asegúrate de cambiar a esa rama después de clonar el repositorio (ver paso 1 más abajo).
-> **Link del video de youtube: https://youtu.be/dy-CJhaxa8I **
+
+> **Link del video de youtube: https://youtu.be/dy-CJhaxa8I**
 
 ## Estructura del proyecto
 

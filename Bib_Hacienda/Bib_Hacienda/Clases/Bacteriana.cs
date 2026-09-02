@@ -1,0 +1,25 @@
+﻿using Bib_Hacienda.Reglas;
+using System;
+
+namespace Bib_Hacienda.Clases
+{
+    public class Bacteriana : Vacuna //Hereda de Vacuna
+    {
+
+        //Atributos
+        private uint periodo_aplicacion;
+
+        //Constructor
+        public Bacteriana(string nombre, string lote, DateTime fecha_vencimiento, DateTime fecha_aplicacion, 
+            uint periodo_aplicacion) : base(nombre, lote, fecha_vencimiento, fecha_aplicacion) {
+        
+            Periodo_aplicacion = periodo_aplicacion;
+            
+        }
+
+        //Accesores
+        public uint Periodo_aplicacion { get => periodo_aplicacion;
+            set => periodo_aplicacion = value>=ReglaVacuna.periodo_min_bac_aplic && value<=ReglaVacuna.periodo_max_bac_aplic? value :
+                throw new Exception($"el valor del periodo de aplicacion debe estar entre {ReglaVacuna.periodo_min_bac_aplic} y {ReglaVacuna.periodo_max_bac_aplic} semanas"); }
+    }
+}

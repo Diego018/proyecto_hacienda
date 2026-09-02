@@ -1,0 +1,10 @@
+ HEAD
+.idea/
+**/bin/
+**/obj/
+**/.vs/
+**/.idea/
+**/packages/
+*.user
+**/appsettings.Development.json
+afc20ed0c3118318769a3af947874f8c4333490f

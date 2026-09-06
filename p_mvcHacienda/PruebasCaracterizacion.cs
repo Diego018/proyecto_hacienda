@@ -5,6 +5,7 @@ using Bib_Hacienda.Clases.Estrategias;
 using Bib_Hacienda.Clases.Derivados;
 using Bib_Hacienda.Clases.Factories;
 using Bib_Hacienda.Clases.Validaciones;
+using Bib_Hacienda.Eventos; 
 
 namespace p_mvcHacienda {
 
@@ -219,6 +220,38 @@ namespace p_mvcHacienda {
                 Console.WriteLine($"ERROR COMPILANDO LA PRUEBA: {ex.Message}");
             }
             
+            Console.WriteLine("====================================================\n");
+        }
+
+        // Prueba de observer pattern
+        public static void ProbarPatronObserver()
+        {
+            Console.WriteLine("\n====================================================");
+            Console.WriteLine("PRUEBA DE CARACTERIZACIÓN: PATRÓN OBSERVER");
+            Console.WriteLine("====================================================");
+
+            try 
+            {
+                // 1. Instanciamos la entidad de dominio (Sujeto emisor)
+                Potrero potreroPrueba = new Potrero("POT-OBSERVER-01", l_tipos_potreros.Novillo);
+
+                // 2. Suscribimos el evento nativo a la Regla de Negocio (Observador)
+                potreroPrueba.PotreroLleno += ReglaPotrero.OnPotreroLleno;
+
+                Console.WriteLine($"[TEST] Potrero '{potreroPrueba.Identificacion}' creado.");
+                Console.WriteLine("[TEST] Suscripción realizada: PotreroLleno -> ReglaPotrero.OnPotreroLleno");
+                Console.WriteLine("[TEST] Disparando el evento directamente a través del método de dominio...\n");
+
+                // 3. Disparamos directamente el evento enviando sus EventArgs específicos
+                potreroPrueba.OnPotreroLleno(new PotreroEventArgs(potreroPrueba));
+
+                Console.WriteLine("ÉXITO: El patrón Observer funcionó correctamente sin acoplamiento.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR EN LA PRUEBA DEL OBSERVER: {ex.Message}");
+            }
+
             Console.WriteLine("====================================================\n");
         }
     }

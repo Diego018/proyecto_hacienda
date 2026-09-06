@@ -2,6 +2,8 @@ using System;
 using Bib_Hacienda.Clases;
 using Bib_Hacienda.Reglas;
 using Bib_Hacienda.Clases.Estrategias;
+using Bib_Hacienda.Clases.Derivados;
+using Bib_Hacienda.Clases.Factories;
 
 namespace p_mvcHacienda {
 
@@ -119,6 +121,40 @@ namespace p_mvcHacienda {
             }
             
             Console.WriteLine("===========================================\n");
+        }
+
+        
+        // Prueba de abstract factory pattern para productos ganaderos
+        public static void ProbarPatronAbstractFactoryProductosGanaderos()
+        {
+            Console.WriteLine("\n====================================================");
+            Console.WriteLine("PRUEBA DE CARACTERIZACIÓN: PATRÓN ABSTRACT FACTORY");
+            Console.WriteLine("====================================================");
+
+            try 
+            {
+                // 1. Instanciamos las fábricas concretas mediante su abstracción base (DIP)
+                ProductoGanaderoFactory fabricaLeche = new LecheFactory(3.8f);
+                ProductoGanaderoFactory fabricaCarne = new CarneFactory(5, "Lomo Fino");
+                ProductoGanaderoFactory fabricaPiel = new PielFactory(3.0f, "A");
+
+                // 2. Delegamos la creación sin usar 'new' sobre los productos concretos
+                ProductoGanadero productoLeche = fabricaLeche.CrearProductoGanadero("L01", "Leche Entera", 3200);
+                ProductoGanadero productoCarne = fabricaCarne.CrearProductoGanadero("C01", "Carne Premium", 28000);
+                ProductoGanadero productoPiel = fabricaPiel.CrearProductoGanadero("P01", "Piel Curtida", 45000);
+
+                // 3. Imprimimos el resultado directamente en la consola (Línea 146 corregida)
+                Console.WriteLine($"ÉXITO (Abstract Factory). Productos creados dinámicamente:\n" +
+                                  $"  - {productoLeche.Nombre} (${productoLeche.CalcularPrecio()})\n" +
+                                  $"  - {productoCarne.Nombre} (${productoCarne.CalcularPrecio()})\n" +
+                                  $"  - {productoPiel.Nombre} (${productoPiel.CalcularPrecio()})");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR COMPILANDO LA PRUEBA: {ex.Message}");
+            }
+            
+            Console.WriteLine("====================================================\n");
         }
     }
 }

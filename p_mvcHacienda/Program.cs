@@ -68,6 +68,7 @@ namespace p_mvcHacienda {
 
             // Ejecutar pruebas de caracterización temporalmente
             p_mvcHacienda.PruebasCaracterizacion.ProbarPatronStrategyVentas();
+            p_mvcHacienda.PruebasCaracterizacion.ProbarPatronAbstractFactoryProductosGanaderos();
 
             app.Run();
         }

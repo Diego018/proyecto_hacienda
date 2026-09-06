@@ -192,5 +192,36 @@ namespace p_mvcHacienda {
             
             Console.WriteLine("====================================================\n");
         }
+
+        // Prueba de abstract factory pattern para vacunas
+        public static void ProbarPatronAbstractFactoryVacunas()
+        {
+            Console.WriteLine("\n====================================================");
+            Console.WriteLine("PRUEBA DE CARACTERIZACIÓN: PATRÓN ABSTRACT FACTORY (VACUNAS)");
+            Console.WriteLine("====================================================");
+
+            try 
+            {
+               VacunaFactory fabricaSanidad = new VacunaFactory();
+                DateTime hoy = DateTime.Now;
+
+                // 1. Instanciamos Viva 
+                Vacuna vacunaViva = fabricaSanidad.CrearVacunaViva("Aftosa-V", "L-99", hoy.AddYears(1), hoy, Viva.enum_l_atenuaciones.Atenuacion20);
+                
+                // 2. Instanciamos Bacteriana.
+                uint periodoPrueba = 3; 
+                Vacuna vacunaBacteriana = fabricaSanidad.CrearVacunaBacteriana("Triple-B", "L-88", hoy.AddMonths(6), hoy, periodoPrueba);
+
+                Console.WriteLine($"ÉXITO (VacunaFactory). Vacunas creadas:\n" +
+                                  $"  - {vacunaViva.Nombre} (Atenuación: {((Viva)vacunaViva).Periodo_atenuacion})\n" +
+                                  $"  - {vacunaBacteriana.Nombre} (Periodo Aplicación: {((Bacteriana)vacunaBacteriana).Periodo_aplicacion} semanas)");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR COMPILANDO LA PRUEBA: {ex.Message}");
+            }
+            
+            Console.WriteLine("====================================================\n");
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Bib_Hacienda.Interfaces.Estrategias;
 
 namespace Bib_Hacienda.Clases
 {
@@ -25,5 +26,20 @@ namespace Bib_Hacienda.Clases
         public Res Res { get => res; private set => res = value; }
         public uint Monto { get => monto; private set => monto = value; }
         public Usuario Usuario { get => usuario; private set => usuario = value; }
+
+        // --- INICIO PATRÓN STRATEGY ---
+        // Nuevo método: Delega el cálculo a la estrategia inyectada.
+        // SRP: Venta gestiona la transacción, la Estrategia gestiona el precio.
+        public void ProcesarVenta(IEstrategiaCalculoVenta estrategia)
+        {
+            if (estrategia == null) 
+                throw new ArgumentNullException(nameof(estrategia), "La estrategia no puede ser nula.");
+            
+            if (this.Res == null) 
+                throw new InvalidOperationException("No hay res asignada a la venta.");
+
+            this.Monto = estrategia.CalcularMonto(this.Res);
+            this.Fecha = DateTime.Now;
+        }
     }
 }

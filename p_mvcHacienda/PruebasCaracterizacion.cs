@@ -4,6 +4,7 @@ using Bib_Hacienda.Reglas;
 using Bib_Hacienda.Clases.Estrategias;
 using Bib_Hacienda.Clases.Derivados;
 using Bib_Hacienda.Clases.Factories;
+using Bib_Hacienda.Clases.Validaciones;
 
 namespace p_mvcHacienda {
 
@@ -66,20 +67,17 @@ namespace p_mvcHacienda {
             if (res == null || string.IsNullOrWhiteSpace(res.Nombre)) {
                 throw new ArgumentException("El nombre de la res no puede estar vacío.");
             }
-
             if (potrero.buscar_res(res.Nombre) != null) {
                 throw new InvalidOperationException($"Ya existe una res con el nombre '{res.Nombre}' en el potrero '{potrero.Identificacion}'");
             }
 
-            int cantidadActual = potrero.obtener_reses().Count;
+            // 1. Ensamblaje de la Cadena de Responsabilidad (Chain of Responsibility)
+            ValidadorHandler cadenaValidacion = new ValidarPotreroHandler();
+            cadenaValidacion.SetNext(new ValidarResHandler());
 
-            if (!ReglaPotrero.validarCapacidad(cantidadActual)) {
-                throw new InvalidOperationException($"El potrero '{potrero.Identificacion}' alcanzó su capacidad máxima ({ReglaPotrero.max_reses_potrero} reses).");
-            }
-
-            if (!res.ValidarCrecimiento()) {
-                throw new Exception($"La res '{res.Nombre}' no cumple las condiciones de peso/edad para su categoría.");
-            }
+            // 2. Ejecución fluida
+            cadenaValidacion.Validar(potrero);
+            cadenaValidacion.Validar(res);
 
             return potrero.anadir_res(res);
         }

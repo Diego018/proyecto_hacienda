@@ -1,6 +1,7 @@
 using System;
 using Bib_Hacienda.Clases;
 using Bib_Hacienda.Reglas;
+using Bib_Hacienda.Clases.Estrategias;
 
 namespace p_mvcHacienda {
 
@@ -90,6 +91,34 @@ namespace p_mvcHacienda {
             catch (Exception ex) {
                 Console.WriteLine($"{id} -> EXCEPCIÓN: {ex.Message}\n");
             }
+        }
+
+        // Prueba de strategy pattern para el cálculo de ventas
+        public static void ProbarPatronStrategyVentas()
+        {
+            Console.WriteLine("\n===========================================");
+            Console.WriteLine("PRUEBA DE CARACTERIZACIÓN: PATRÓN STRATEGY");
+            Console.WriteLine("===========================================");
+
+            try 
+            {
+                // 1. Simular la Res (Cebon de 400kg). 
+                Res miCebon = new Cebon("Toro Loco", 400, DateTime.Now.AddYears(-3));
+
+                // 2. El cálculo TO-BE 
+                Venta ventaToBe = new Venta(null, null, DateTime.Now, miCebon, 0);
+                
+                // Inyectamos la estrategia
+                ventaToBe.ProcesarVenta(new EstrategiaVentaCebon());
+
+                Console.WriteLine($"Monto Calculado por Strategy (TO-BE): {ventaToBe.Monto}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR COMPILANDO LA PRUEBA: {ex.Message}");
+            }
+            
+            Console.WriteLine("===========================================\n");
         }
     }
 }

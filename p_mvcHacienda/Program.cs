@@ -66,6 +66,9 @@ namespace p_mvcHacienda {
                 name: "default",
                 pattern: "{controller=Account}/{action=Login}/{id?}");
 
+            // Ejecutar pruebas de caracterización temporalmente
+            p_mvcHacienda.PruebasCaracterizacion.ProbarPatronStrategyVentas();
+
             app.Run();
         }
     }

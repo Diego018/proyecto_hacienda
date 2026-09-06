@@ -4,18 +4,29 @@ using p_mvcHacienda.Servicios;
 using p_mvcHacienda.Servicios.contratos;
 using p_mvcHacienda.Servicios.Contratos;
 
-namespace p_mvcHacienda {
-
-    public class Program {
-
-        public static void Main(string[] args) {
-
-            var builder = WebApplication.CreateBuilder(args);
-
+namespace p_mvcHacienda 
+{
+    public class Program 
+    {
+        public static void Main(string[] args) 
+        {
+            
+            // 1. Evidencia de Preservación de Comportamiento (AS-IS vs TO-BE)
             PruebasCaracterizacion.EjecutarCasosASIS();
 
-            builder.Services.AddControllersWithViews();
+            // 2. Evidencia de Extensibilidad por Patrones
+            PruebasCaracterizacion.ProbarPatronStrategyVentas();
+            PruebasCaracterizacion.ProbarPatronAbstractFactoryProductosGanaderos();
+            PruebasCaracterizacion.ProbarPatronFactoryMethodReses();
+            PruebasCaracterizacion.ProbarPatronAbstractFactoryVacunas();
+            PruebasCaracterizacion.ProbarPatronObserver();
 
+            // =========================================================================
+            // INICIALIZACIÓN DEL SERVIDOR WEB MVC
+            // =========================================================================
+            var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddControllersWithViews();
             builder.Services.AddAuthentication("CookieAuth")
                 .AddCookie("CookieAuth", options => {
                     options.Cookie.Name = "HaciendaSoft.Auth";
@@ -25,18 +36,14 @@ namespace p_mvcHacienda {
                 });
 
             builder.Services.AddHttpContextAccessor();
-
             string directorioDatos = Path.Combine(builder.Environment.ContentRootPath, "Datos");
-
+            
             builder.Services.AddSingleton<PersistenciaTxtService>(sp =>
                 new PersistenciaTxtService(directorioDatos));
-
             builder.Services.AddSingleton<IPersistenciaHacienda>(sp =>
                 sp.GetRequiredService<PersistenciaTxtService>());
-
             builder.Services.AddSingleton<IPersistenciaVentas>(sp =>
                 sp.GetRequiredService<PersistenciaTxtService>());
-
             builder.Services.AddSingleton<IPersistenciaUsuarios>(sp =>
                 sp.GetRequiredService<PersistenciaTxtService>());
 
@@ -56,7 +63,6 @@ namespace p_mvcHacienda {
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
 
             app.UseAuthentication();
@@ -65,13 +71,6 @@ namespace p_mvcHacienda {
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Account}/{action=Login}/{id?}");
-
-            // Ejecutar pruebas de caracterización temporalmente
-            p_mvcHacienda.PruebasCaracterizacion.ProbarPatronStrategyVentas();
-            p_mvcHacienda.PruebasCaracterizacion.ProbarPatronAbstractFactoryProductosGanaderos();
-            p_mvcHacienda.PruebasCaracterizacion.ProbarPatronFactoryMethodReses();
-            p_mvcHacienda.PruebasCaracterizacion.ProbarPatronAbstractFactoryVacunas();
-            p_mvcHacienda.PruebasCaracterizacion.ProbarPatronObserver();
 
             app.Run();
         }

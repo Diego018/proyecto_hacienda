@@ -12,7 +12,7 @@ namespace Bib_Hacienda.Clases.Validaciones
                 // Delega en ReglaRes indirectamente a través del método de la entidad
                 if (!res.ValidarCrecimiento())
                 {
-                    throw new Exception($"La res '{res.Nombre}' no cumple las condiciones de peso/edad.");
+                    throw new Exception($"La res '{res.Nombre}' no cumple las condiciones de peso/edad para su categoría.");
                 }
             }
             return base.Validar(entidad);

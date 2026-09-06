@@ -2,6 +2,8 @@ using System;
 using Bib_Hacienda.Clases;
 using Bib_Hacienda.Reglas;
 using Bib_Hacienda.Clases.Estrategias;
+using Bib_Hacienda.Clases.Derivados;
+using Bib_Hacienda.Clases.Factories;
 
 namespace p_mvcHacienda {
 
@@ -119,6 +121,107 @@ namespace p_mvcHacienda {
             }
             
             Console.WriteLine("===========================================\n");
+        }
+
+        
+        // Prueba de abstract factory pattern para productos ganaderos
+        public static void ProbarPatronAbstractFactoryProductosGanaderos()
+        {
+            Console.WriteLine("\n====================================================");
+            Console.WriteLine("PRUEBA DE CARACTERIZACIÓN: PATRÓN ABSTRACT FACTORY");
+            Console.WriteLine("====================================================");
+
+            try 
+            {
+                // 1. Instanciamos las fábricas concretas mediante su abstracción base (DIP)
+                ProductoGanaderoFactory fabricaLeche = new LecheFactory(3.8f);
+                ProductoGanaderoFactory fabricaCarne = new CarneFactory(5, "Lomo Fino");
+                ProductoGanaderoFactory fabricaPiel = new PielFactory(3.0f, "A");
+
+                // 2. Delegamos la creación sin usar 'new' sobre los productos concretos
+                ProductoGanadero productoLeche = fabricaLeche.CrearProductoGanadero("L01", "Leche Entera", 3200);
+                ProductoGanadero productoCarne = fabricaCarne.CrearProductoGanadero("C01", "Carne Premium", 28000);
+                ProductoGanadero productoPiel = fabricaPiel.CrearProductoGanadero("P01", "Piel Curtida", 45000);
+
+                // 3. Imprimimos el resultado directamente en la consola (Línea 146 corregida)
+                Console.WriteLine($"ÉXITO (Abstract Factory). Productos creados dinámicamente:\n" +
+                                  $"  - {productoLeche.Nombre} (${productoLeche.CalcularPrecio()})\n" +
+                                  $"  - {productoCarne.Nombre} (${productoCarne.CalcularPrecio()})\n" +
+                                  $"  - {productoPiel.Nombre} (${productoPiel.CalcularPrecio()})");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR COMPILANDO LA PRUEBA: {ex.Message}");
+            }
+            
+            Console.WriteLine("====================================================\n");
+        }
+
+        // Prueba de abstract factory pattern para reses
+        public static void ProbarPatronFactoryMethodReses()
+        {
+            Console.WriteLine("\n====================================================");
+            Console.WriteLine("PRUEBA DE CARACTERIZACIÓN: FACTORY METHOD (RESES)");
+            Console.WriteLine("====================================================");
+
+            try 
+            {
+                // 1. Instanciamos las fábricas usando la abstracción estricta del UML
+                ResFactory fabricaTernero = new TerneroFactory();
+                ResFactory fabricaNovillo = new NovilloFactory();
+                ResFactory fabricaCebon = new CebonFactory();
+
+                // 2. Delegamos la creación para evitar el 'new Ternero()' directo en Web
+                Res miTernero = fabricaTernero.CrearRes("Toro1", 200, DateTime.Now.AddMonths(-10));
+                Res miNovillo = fabricaNovillo.CrearRes("Toro2", 450, DateTime.Now.AddMonths(-55));
+                Res miCebon = fabricaCebon.CrearRes("Toro3", 350, DateTime.Now.AddMonths(-30));
+
+                // 3. Verificamos que las entidades creadas por la fábrica pasen la validación AS-IS
+                Potrero p = new Potrero("P_PRUEBA", l_tipos_potreros.Ternero);
+                AgregarConValidacion(p, miTernero); // Validará el peso y edad
+
+                Console.WriteLine($"ÉXITO (ResFactory). Reses creadas polimórficamente:\n" +
+                                  $"  - {miTernero.Nombre} (Tipo instanciado: {miTernero.GetType().Name})\n" +
+                                  $"  - {miNovillo.Nombre} (Tipo instanciado: {miNovillo.GetType().Name})\n" +
+                                  $"  - {miCebon.Nombre} (Tipo instanciado: {miCebon.GetType().Name})");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR COMPILANDO LA PRUEBA: {ex.Message}");
+            }
+            
+            Console.WriteLine("====================================================\n");
+        }
+
+        // Prueba de abstract factory pattern para vacunas
+        public static void ProbarPatronAbstractFactoryVacunas()
+        {
+            Console.WriteLine("\n====================================================");
+            Console.WriteLine("PRUEBA DE CARACTERIZACIÓN: PATRÓN ABSTRACT FACTORY (VACUNAS)");
+            Console.WriteLine("====================================================");
+
+            try 
+            {
+               VacunaFactory fabricaSanidad = new VacunaFactory();
+                DateTime hoy = DateTime.Now;
+
+                // 1. Instanciamos Viva 
+                Vacuna vacunaViva = fabricaSanidad.CrearVacunaViva("Aftosa-V", "L-99", hoy.AddYears(1), hoy, Viva.enum_l_atenuaciones.Atenuacion20);
+                
+                // 2. Instanciamos Bacteriana.
+                uint periodoPrueba = 3; 
+                Vacuna vacunaBacteriana = fabricaSanidad.CrearVacunaBacteriana("Triple-B", "L-88", hoy.AddMonths(6), hoy, periodoPrueba);
+
+                Console.WriteLine($"ÉXITO (VacunaFactory). Vacunas creadas:\n" +
+                                  $"  - {vacunaViva.Nombre} (Atenuación: {((Viva)vacunaViva).Periodo_atenuacion})\n" +
+                                  $"  - {vacunaBacteriana.Nombre} (Periodo Aplicación: {((Bacteriana)vacunaBacteriana).Periodo_aplicacion} semanas)");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR COMPILANDO LA PRUEBA: {ex.Message}");
+            }
+            
+            Console.WriteLine("====================================================\n");
         }
     }
 }

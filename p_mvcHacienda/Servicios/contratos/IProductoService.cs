@@ -1,4 +1,5 @@
 using Bib_Hacienda.Clases;
+using Bib_Hacienda.Clases.Derivados;
 
 namespace p_mvcHacienda.Servicios.contratos;
 

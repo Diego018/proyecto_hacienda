@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Bib_Hacienda.Clases.RefactorBiblioteca;
+using Bib_Hacienda.Clases.Derivados;
 
 namespace Bib_Hacienda.Clases
 {

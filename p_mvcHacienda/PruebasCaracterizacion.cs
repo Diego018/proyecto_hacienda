@@ -156,5 +156,41 @@ namespace p_mvcHacienda {
             
             Console.WriteLine("====================================================\n");
         }
+
+        // Prueba de abstract factory pattern para reses
+        public static void ProbarPatronFactoryMethodReses()
+        {
+            Console.WriteLine("\n====================================================");
+            Console.WriteLine("PRUEBA DE CARACTERIZACIÓN: FACTORY METHOD (RESES)");
+            Console.WriteLine("====================================================");
+
+            try 
+            {
+                // 1. Instanciamos las fábricas usando la abstracción estricta del UML
+                ResFactory fabricaTernero = new TerneroFactory();
+                ResFactory fabricaNovillo = new NovilloFactory();
+                ResFactory fabricaCebon = new CebonFactory();
+
+                // 2. Delegamos la creación para evitar el 'new Ternero()' directo en Web
+                Res miTernero = fabricaTernero.CrearRes("Toro1", 200, DateTime.Now.AddMonths(-10));
+                Res miNovillo = fabricaNovillo.CrearRes("Toro2", 450, DateTime.Now.AddMonths(-55));
+                Res miCebon = fabricaCebon.CrearRes("Toro3", 350, DateTime.Now.AddMonths(-30));
+
+                // 3. Verificamos que las entidades creadas por la fábrica pasen la validación AS-IS
+                Potrero p = new Potrero("P_PRUEBA", l_tipos_potreros.Ternero);
+                AgregarConValidacion(p, miTernero); // Validará el peso y edad
+
+                Console.WriteLine($"ÉXITO (ResFactory). Reses creadas polimórficamente:\n" +
+                                  $"  - {miTernero.Nombre} (Tipo instanciado: {miTernero.GetType().Name})\n" +
+                                  $"  - {miNovillo.Nombre} (Tipo instanciado: {miNovillo.GetType().Name})\n" +
+                                  $"  - {miCebon.Nombre} (Tipo instanciado: {miCebon.GetType().Name})");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR COMPILANDO LA PRUEBA: {ex.Message}");
+            }
+            
+            Console.WriteLine("====================================================\n");
+        }
     }
 }

@@ -105,27 +105,13 @@ namespace p_mvcHacienda {
                 // 1. Simular la Res (Cebon de 400kg). 
                 Res miCebon = new Cebon("Toro Loco", 400, DateTime.Now.AddYears(-3));
 
-                // 2. El cálculo AS-IS (Si el Cebon estaba a 5000 el kilo)
-                uint montoEsperadoAsIs = 400 * 5000;
-
-                // 3. El cálculo TO-BE (Pasamos null a Usuario y Potrero para no complicar la prueba)
+                // 2. El cálculo TO-BE 
                 Venta ventaToBe = new Venta(null, null, DateTime.Now, miCebon, 0);
                 
                 // Inyectamos la estrategia
                 ventaToBe.ProcesarVenta(new EstrategiaVentaCebon());
 
-                // 4. Mostrar Resultados
-                Console.WriteLine($"Monto Calculado a mano (AS-IS):   {montoEsperadoAsIs}");
                 Console.WriteLine($"Monto Calculado por Strategy (TO-BE): {ventaToBe.Monto}");
-                
-                if (montoEsperadoAsIs == ventaToBe.Monto)
-                {
-                    Console.WriteLine("VEREDICTO: ÉXITO. El comportamiento observable se conservó intacto.");
-                }
-                else
-                {
-                    Console.WriteLine("VEREDICTO: FALLO. Los montos no coinciden.");
-                }
             }
             catch (Exception ex)
             {

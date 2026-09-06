@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Bib_Hacienda.Eventos;
 
 namespace Bib_Hacienda.Clases
 {
@@ -57,6 +58,20 @@ namespace Bib_Hacienda.Clases
         
             return new List<Res>(l_reses);
             
+        }
+
+        // --- PATRÓN OBSERVER: EVENTOS NATIVOS ---
+        public event EventHandler<PotreroEventArgs> PotreroLleno;
+        public event EventHandler<PotreroEventArgs> PotreroMitad;
+
+        public virtual void OnPotreroLleno(PotreroEventArgs e) 
+        {
+            PotreroLleno?.Invoke(this, e);
+        }
+
+        public virtual void OnPotreroMitad(PotreroEventArgs e) 
+        {
+            PotreroMitad?.Invoke(this, e);
         }
         
     }

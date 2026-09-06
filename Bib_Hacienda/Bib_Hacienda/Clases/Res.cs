@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Bib_Hacienda.Clases.RefactorBiblioteca;
 using Bib_Hacienda.Clases.Derivados;
+using Bib_Hacienda.Eventos;
 
 namespace Bib_Hacienda.Clases
 {
@@ -64,6 +65,19 @@ namespace Bib_Hacienda.Clases
         public abstract bool EstaEnPesoMinimo();
         public abstract bool EstaAptaParaVenta();
         
+        // --- PATRÓN OBSERVER: EVENTOS NATIVOS ---
+        public event EventHandler<ResEventArgs> PesoMinimoAlcanzado;
+        public event EventHandler<ResEventArgs> AptaParaVenta;
+
+        public virtual void OnPesoMinimoAlcanzado(ResEventArgs e) 
+        {
+            PesoMinimoAlcanzado?.Invoke(this, e);
+        }
+
+        public virtual void OnAptaParaVenta(ResEventArgs e) 
+        {
+            AptaParaVenta?.Invoke(this, e);
+        }
     }
     
 }

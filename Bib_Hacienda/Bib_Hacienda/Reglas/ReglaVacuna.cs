@@ -1,4 +1,7 @@
-﻿namespace Bib_Hacienda.Reglas
+﻿using System;
+using Bib_Hacienda.Eventos;
+
+namespace Bib_Hacienda.Reglas
 {
     public abstract class ReglaVacuna
     {
@@ -15,5 +18,9 @@
         public static readonly byte periodo_min_bac_aplic = 2;
         public static readonly byte periodo_max_bac_aplic = 4;
 
+        public static void OnVacunaVencida(object sender, VacunaEventArgs e)
+        {
+            Console.WriteLine($"[ALERTA REGLA]: La vacuna '{e.EntidadVacuna.Nombre}' está vencida.");
+        }
     }
 }

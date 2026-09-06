@@ -1,4 +1,7 @@
-﻿namespace Bib_Hacienda.Reglas
+﻿using System;
+using Bib_Hacienda.Eventos;
+
+namespace Bib_Hacienda.Reglas
 {
     public abstract class ReglaRes
     {
@@ -14,5 +17,15 @@
         public static readonly byte edad_max_ternero = 12;
         public static readonly byte edad_max_cebon = 48;
 
+        // Los métodos que exige el diagrama UML para escuchar a la Res
+        public static void OnPesoMinimoAlcanzado(object sender, ResEventArgs e)
+        {
+            Console.WriteLine($"[ALERTA REGLA]: La res '{e.EntidadRes.Nombre}' alcanzó el peso mínimo.");
+        }
+
+        public static void OnAptaParaVenta(object sender, ResEventArgs e)
+        {
+            Console.WriteLine($"[ALERTA REGLA]: La res '{e.EntidadRes.Nombre}' ya es apta para la venta.");
+        }
     }
 }

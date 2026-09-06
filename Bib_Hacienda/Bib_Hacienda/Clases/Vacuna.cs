@@ -1,4 +1,5 @@
 ﻿using System;
+using Bib_Hacienda.Eventos;
 
 namespace Bib_Hacienda.Clases
 {
@@ -22,5 +23,13 @@ namespace Bib_Hacienda.Clases
         public string Lote { get => lote; private set => lote = value; }
         public DateTime Fecha_vencimiento { get => fecha_vencimiento; private set => fecha_vencimiento = value; }
         public DateTime Fecha_aplicacion { get => fecha_aplicacion; private set => fecha_aplicacion = value; }
+
+        // --- PATRÓN OBSERVER: EVENTOS NATIVOS ---
+        public event EventHandler<VacunaEventArgs> VacunaVencida;
+
+        public virtual void OnVacunaVencida(VacunaEventArgs e) 
+        {
+            VacunaVencida?.Invoke(this, e);
+        }
     }
 }

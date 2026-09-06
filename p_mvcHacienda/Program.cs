@@ -71,6 +71,7 @@ namespace p_mvcHacienda {
             p_mvcHacienda.PruebasCaracterizacion.ProbarPatronAbstractFactoryProductosGanaderos();
             p_mvcHacienda.PruebasCaracterizacion.ProbarPatronFactoryMethodReses();
             p_mvcHacienda.PruebasCaracterizacion.ProbarPatronAbstractFactoryVacunas();
+            p_mvcHacienda.PruebasCaracterizacion.ProbarPatronObserver();
 
             app.Run();
         }

@@ -4,6 +4,8 @@ using Bib_Hacienda.Reglas;
 using Bib_Hacienda.Clases.Estrategias;
 using Bib_Hacienda.Clases.Derivados;
 using Bib_Hacienda.Clases.Factories;
+using Bib_Hacienda.Clases.Validaciones;
+using Bib_Hacienda.Eventos; 
 
 namespace p_mvcHacienda {
 
@@ -66,20 +68,17 @@ namespace p_mvcHacienda {
             if (res == null || string.IsNullOrWhiteSpace(res.Nombre)) {
                 throw new ArgumentException("El nombre de la res no puede estar vacío.");
             }
-
             if (potrero.buscar_res(res.Nombre) != null) {
                 throw new InvalidOperationException($"Ya existe una res con el nombre '{res.Nombre}' en el potrero '{potrero.Identificacion}'");
             }
 
-            int cantidadActual = potrero.obtener_reses().Count;
+            // 1. Ensamblaje de la Cadena de Responsabilidad (Chain of Responsibility)
+            ValidadorHandler cadenaValidacion = new ValidarPotreroHandler();
+            cadenaValidacion.SetNext(new ValidarResHandler());
 
-            if (!ReglaPotrero.validarCapacidad(cantidadActual)) {
-                throw new InvalidOperationException($"El potrero '{potrero.Identificacion}' alcanzó su capacidad máxima ({ReglaPotrero.max_reses_potrero} reses).");
-            }
-
-            if (!res.ValidarCrecimiento()) {
-                throw new Exception($"La res '{res.Nombre}' no cumple las condiciones de peso/edad para su categoría.");
-            }
+            // 2. Ejecución fluida
+            cadenaValidacion.Validar(potrero);
+            cadenaValidacion.Validar(res);
 
             return potrero.anadir_res(res);
         }
@@ -221,6 +220,38 @@ namespace p_mvcHacienda {
                 Console.WriteLine($"ERROR COMPILANDO LA PRUEBA: {ex.Message}");
             }
             
+            Console.WriteLine("====================================================\n");
+        }
+
+        // Prueba de observer pattern
+        public static void ProbarPatronObserver()
+        {
+            Console.WriteLine("\n====================================================");
+            Console.WriteLine("PRUEBA DE CARACTERIZACIÓN: PATRÓN OBSERVER");
+            Console.WriteLine("====================================================");
+
+            try 
+            {
+                // 1. Instanciamos la entidad de dominio (Sujeto emisor)
+                Potrero potreroPrueba = new Potrero("POT-OBSERVER-01", l_tipos_potreros.Novillo);
+
+                // 2. Suscribimos el evento nativo a la Regla de Negocio (Observador)
+                potreroPrueba.PotreroLleno += ReglaPotrero.OnPotreroLleno;
+
+                Console.WriteLine($"[TEST] Potrero '{potreroPrueba.Identificacion}' creado.");
+                Console.WriteLine("[TEST] Suscripción realizada: PotreroLleno -> ReglaPotrero.OnPotreroLleno");
+                Console.WriteLine("[TEST] Disparando el evento directamente a través del método de dominio...\n");
+
+                // 3. Disparamos directamente el evento enviando sus EventArgs específicos
+                potreroPrueba.OnPotreroLleno(new PotreroEventArgs(potreroPrueba));
+
+                Console.WriteLine("ÉXITO: El patrón Observer funcionó correctamente sin acoplamiento.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR EN LA PRUEBA DEL OBSERVER: {ex.Message}");
+            }
+
             Console.WriteLine("====================================================\n");
         }
     }

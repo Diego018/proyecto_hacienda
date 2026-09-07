@@ -6,6 +6,8 @@ Proyecto académico de Arquitectura de Software — Segunda evolución de un sis
 
 > **Link del video de youtube: https://www.youtube.com/watch?v=Y_3A9b2mBMg**
 
+**Nota:** Si la calidad del video al inicio es baja, por favor ajusta la configuración del reproductor de YouTube a la calidad más alta (1080p HD). En Youtube: Configuracion -> Calidad -> 10809 HD
+
 ## Estructura del proyecto
 
 ```

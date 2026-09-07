@@ -1,10 +1,12 @@
-# Sistema de Gestión de Hacienda Ganadera
+# Sistema de Gestión de Hacienda Ganadera - Fase 2 (Patrones de Diseño)
 
-Proyecto académico de Arquitectura de Software — refactorización de un sistema de gestión ganadera (potreros, reses, vacunas, ventas, usuarios) aplicando los 5 principios SOLID, siguiendo una arquitectura en capas (Presentación, Aplicación, Dominio, Infraestructura).
+Proyecto académico de Arquitectura de Software — Segunda evolución de un sistema de gestión ganadera (potreros, reses, vacunas, ventas, usuarios). En esta fase, transicionamos de un diseño basado puramente en principios SOLID hacia una arquitectura **robusta y extensible** mediante la aplicación de Patrones de Diseño, reduciendo rigideces estructurales sin alterar el comportamiento observable del negocio.
 
 >  **Todo el trabajo del proyecto (código fuente, diagramas y documentación) se encuentra en la rama `development`, no en `main`.** Asegúrate de cambiar a esa rama después de clonar el repositorio (ver paso 1 más abajo).
 
-> **Link del video de youtube: https://youtu.be/dy-CJhaxa8I**
+> **Link del video de youtube: https://www.youtube.com/watch?v=Y_3A9b2mBMg**
+
+**Nota:** Si la calidad del video al inicio es baja, por favor ajusta la configuración del reproductor de YouTube a la calidad más alta (1080p HD). En Youtube: Configuracion -> Calidad -> 10809 HD
 
 ## Estructura del proyecto
 
@@ -18,7 +20,7 @@ proyecto_hacienda/
 
 ## Requisitos previos
 
-- .NET SDK 10 instalado.
+- .NET SDK 9 instalado.
 - (Opcional) Rider, Visual Studio o VS Code con la extensión de C#, si prefieres abrir y ejecutar desde un IDE en lugar de la terminal.
 
 ## Instrucciones de ejecución paso a paso
@@ -48,7 +50,7 @@ cd p_mvcHacienda
 dotnet run
 ```
 
-Al iniciar, la consola imprime automáticamente los 8 casos de caracterización (`PruebasCaracterizacion.cs`), como evidencia de que el comportamiento del sistema se preservó tras la refactorización (AS-IS vs TO-BE).
+Al iniciar, la consola ejecuta automáticamente nuestro Motor de Aserción Automática (PruebasCaracterizacion.cs). Este audita en tiempo real que las salidas de la arquitectura refactorizada (TO-BE) coincidan exactamente con la línea base original (AS-IS), certificando que el comportamiento del sistema se preservó.
 
 ### 4. Acceder a la aplicación
 
@@ -78,7 +80,7 @@ El sistema guarda su información en archivos de texto plano dentro de la carpet
 
 | Integrante | ID | Rol Asignado | Frente de Responsabilidad | % Part. |
 |---|---|---|---|---|
-| Diego Villegas | 000553180 | Arquitecto de Dominio | Identificación de responsabilidades y límites de cada clase (SRP), modelo del dominio, jerarquías de herencia y su validez frente a LSP. | 100% |
-| Salomé Fonseca | 000248599 | Arquitecto de Dependencias | Mapa de dependencias, abstracciones (interfaces), inversión e inyección de dependencias, composition root (DIP, ISP). | 100% |
+| Diego Villegas | 000553180 | Arquitecto Líder | Detección de puntos rígidos, selección/descarte de patrones, diseño TO-BE. | 100% |
+| Salomé Fonseca | 000248599 | Arquitecta de Riesgos | Análisis de riesgo, evaluación de exposición y plan de mitigación técnica. | 100% |
 | María Fernanda Muñoz | 000543839 | Ingeniero de Comportamiento | Pruebas de caracterización, evidencia de que la conducta observable se preservó, escenarios de ejecución del programa principal. | 100% |
-| Pilar Mantilla | 000547259 | Integrador y Evidencia | Consistencia diagrama–código, estructura del entregable, bitácora de uso de IA, métricas antes/después. | 100% |
+| Pilar Mantilla | 000547259 | Integrador y Evidencia | Construcción de vista de negocio, guía técnica para desarrolladores, bitácora IA y consolidación del documento. | 100% |
